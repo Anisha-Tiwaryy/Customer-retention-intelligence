@@ -1,135 +1,72 @@
 # Customer Retention Intelligence Dashboard
 
-> **Stack:** Python · XGBoost · SHAP · SMOTE · SciPy · Jinja2 · SQL · Power BI · Streamlit
+Python · XGBoost · SHAP · SMOTE · SciPy · SQL · Power BI · Streamlit
 
-An end-to-end machine learning pipeline for predicting customer churn, with full explainability, statistical validation, automated reporting, and stakeholder-ready business dashboards.
+Telecom companies lose significant revenue to churn every month, and most of it is preventable. This project builds a full churn prediction pipeline on 7,043 customer records — from raw data with quality issues all the way to a deployed dashboard with live prediction and a weekly automated report.
 
----
-
-## 🎯 Key Highlights
-
-- **Auto-detected 340+ data quality issues** (missing values, duplicates, type inconsistencies) across 7,043 customer records before any modelling
-- **XGBoost** achieves **80%+ recall** — ensuring high-risk churners are not missed
-- **SHAP waterfall analysis** confirms **contract type as the dominant churn predictor**
-- **Chi-Square + ANOVA** statistical tests validate that EDA patterns are not due to chance (p < 0.05)
-- **Automated Jinja2 HTML report** tracks response rates, at-risk cohorts, revenue impact, and MoM trends
-- **Retention strategy** projects a **23% reduction** in high-risk churn
-- Full **Power BI + Streamlit** dashboards for stakeholder and ops team consumption
+The focus throughout is on business utility, not just model accuracy. Every prediction comes with a SHAP explanation, every insight is framed as a retention action, and the output is packaged for a non-technical stakeholder.
 
 ---
 
-## 📁 Project Structure
+## Power BI Dashboard
 
-```
-customer-churn-intelligence/
-├── data_prep.py          # Data generation, validation (340+ issues), cleaning, SMOTE
-├── model.py              # LR vs RF vs XGBoost training, SHAP computation, model saving
-├── app.py                # Streamlit dashboard (7 views including Statistical Testing)
-├── report_generator.py   # Jinja2 automated HTML weekly performance report
-├── export_csv.py         # Exports clean data + model outputs → CSV for Power BI
-├── sql_analysis.sql      # SQL: data quality checks, churn segmentation, CTE risk scoring
-├── POWERBI_GUIDE.md      # Full DAX measures and dashboard build guide (4 pages)
+![Executive Summary](assets/page1.png)
+![Deep Dive Analytics](assets/page2.png)
+![Model & Explainability](assets/page3.png)
+![Trend Tracker](assets/page4.png)
+
+---
+
+## What this project does
+
+The pipeline starts with an upstream data quality check that auto-detects missing values, duplicates, and type inconsistencies before any modelling runs — 340+ issues flagged and resolved across the dataset. SMOTE is then applied to handle class imbalance before training three models (Logistic Regression, Random Forest, XGBoost) side by side.
+
+XGBoost comes out on top with 82.1% recall — the priority metric here, since missing a churner costs more than a false positive retention offer. SHAP waterfall analysis then breaks down each prediction at the feature level, confirming contract type as the dominant driver (month-to-month customers churn at 42% vs 3% for two-year contracts).
+
+Statistical tests (Chi-Square, ANOVA) back up what the EDA shows — none of the patterns are due to chance. The top 20% at-risk cohort, when targeted with contract upgrade incentives, projects a 23% reduction in high-risk churn.
+
+The Streamlit app brings all of this together in one place. The automated report generates a weekly HTML summary with an at-risk customer priority list, revenue impact, and month-on-month trend tracking — no manual work needed.
+
+---
+
+## Project structure
+---├── data_prep.py           — data generation, quality validation, cleaning, SMOTE
+├── model.py               — LR vs RF vs XGBoost training, SHAP, model saving
+├── app.py                 — Streamlit dashboard (7 tabs)
+├── report_generator.py    — automated Jinja2 HTML weekly report
+├── export_csv.py          — exports cleaned data and model outputs to CSV for Power BI
+├── sql_analysis.sql       — data quality checks, churn segmentation, CTE risk scoring
+├── powerbi_dashboard.html — interactive Power BI dashboard (open in browser)
 ├── requirements.txt
 └── README.md
-```
 
----
-
-## 🚀 Quick Start
-
-```bash
-# Install dependencies
+## Running it
 pip install -r requirements.txt
-
-# Train models and generate all artifacts
-python model.py
-
-# Export CSVs for Power BI
-python export_csv.py
-
-# Generate automated weekly HTML report
-python report_generator.py
-
-# Launch Streamlit dashboard
-streamlit run app.py
-```
+python model.py              # train models, generate artifacts
+python export_csv.py         # export CSVs for Power BI
+python report_generator.py   # generate weekly HTML report
+streamlit run app.py         # launch dashboard
 
 ---
 
-## 📊 Streamlit Dashboard Views
+## Key findings
 
-| View | What it shows |
-|------|--------------|
-| 📋 Data Quality Audit | 340+ issues breakdown, missing values chart, cleaning pipeline actions |
-| 🤖 Model Comparison | LR vs RF vs XGBoost — Accuracy, Precision, Recall, F1, AUC (highlighted best) |
-| 🔍 SHAP Explainability | Global feature importance bar, individual customer waterfall plots |
-| ⚠️ At-Risk Cohorts | Churn by contract type, tenure bucket, and monthly charges tier |
-| 📈 Trend Analysis | Month-on-month churn rate decline following retention interventions |
-| 🧮 Statistical Testing | Chi-Square (contract vs churn, internet vs churn) + ANOVA + Revenue at Risk |
-| 🎯 Live Prediction | Real-time churn probability input with risk meter and retention recommendations |
+Month-to-month customers churn at 42% — 14x the rate of two-year contract holders. Customers in their first six months are three times more likely to leave than long-tenured ones. Fiber optic internet users and electronic check payers both show elevated churn, compounding the risk when they overlap with short tenure.
+
+Churn declined from 30.1% to 19.4% across the tracked period following targeted retention interventions on the highest-risk cohort — a 35.5% relative reduction.
 
 ---
 
-## 📄 Automated Report (report_generator.py)
+## Tech stack
 
-Generates a structured **HTML performance report** (Jinja2-templated) tracking:
-- KPI summary: total customers, churn rate, at-risk count, projected savings
-- Revenue at risk: monthly + annual + projected savings from 23% retention
-- Churn rate by contract type, tenure bucket, and payment method
-- Month-on-month churn trend table
-- Model performance summary (LR vs RF vs XGBoost)
-- Top 10 at-risk customers with priority outreach list
-
-Output: `reports/retention_report_YYYYMMDD.html` — opens directly in any browser, print-ready.
-
----
-
-## 🧮 Statistical Testing
-
-| Test | Variables | Result |
-|------|-----------|--------|
-| Chi-Square | Contract Type vs Churn | **Significant** — p < 0.05; contract type is a non-random churn predictor |
-| Chi-Square | Internet Service vs Churn | **Significant** — Fiber optic users show elevated churn |
-| One-Way ANOVA | Monthly Charges across Contract Groups | **Significant** — charges differ meaningfully across contract types |
-
----
-
-## 🔑 Key Findings
-
-| Finding | Insight |
-|---------|---------|
-| Contract type | Month-to-month customers churn at **42%** vs **3%** for 2-year contracts |
-| Tenure | Customers < 6 months are **3x more likely** to churn |
-| Monthly charges | Customers paying > $85/month show elevated churn risk |
-| SMOTE | Balanced class distribution from ~26% minority to 50:50 for fair training |
-| MoM trend | Churn declined from **30.1% to 19.4%** after targeted retention interventions |
-
----
-
-## 📈 Business Impact
-
-- Targeting top 20% at-risk cohort (month-to-month, tenure < 6 months) with contract upgrade incentives projects a **23% reduction in high-risk churn**
-- High recall (80%+) ensures retention resources are directed to the right customers
-- Automated weekly HTML report eliminates manual reporting overhead
-
----
-
-## 🛠 Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| Language | Python 3.10+ |
-| ML Models | Scikit-learn, XGBoost |
+| | |
+|---|---|
+| ML | Scikit-learn, XGBoost |
 | Explainability | SHAP |
-| Statistical Tests | SciPy (chi2_contingency, f_oneway) |
-| Class Balancing | SMOTE (imbalanced-learn) |
-| Visualization | Matplotlib, Seaborn |
-| Reporting | Jinja2 (HTML report generation) |
+| Statistical tests | SciPy — chi2_contingency, f_oneway |
+| Class balancing | imbalanced-learn (SMOTE) |
+| Reporting | Jinja2 |
 | Dashboard | Streamlit |
-| BI Dashboard | Power BI (DAX in POWERBI_GUIDE.md) |
-| SQL Analysis | SQLite / PostgreSQL compatible |
-| Data | Telco Customer Churn (Kaggle-style, 7,043 records) |
-
----
-
-*Built by Anisha Tiwary · Final Year ECE · KIIT University 2026*
+| BI | Power BI |
+| SQL | SQLite / PostgreSQL compatible |
+| Data | Telco Customer Churn — 7,043 records |
